@@ -1,5 +1,5 @@
 from display_modes import module
-from PIL import Image
+from PIL import Image, ImageFile
 import time
 
 class ImageViewer(module.Module):
@@ -7,6 +7,7 @@ class ImageViewer(module.Module):
 
     def __init__(self, driver, filename):
         super().__init__(driver)
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
         self.filename = filename
 
     def run(self):
@@ -15,7 +16,12 @@ class ImageViewer(module.Module):
             # print("needs conversion" + str(img.mode))
             needs_resize = img.size != (self.width, self.height)
             # print("needs resize" + str(needs_resize))
-            if getattr(img, "is_animated", True):
+            if getattr(img, "is_animated", False):
+                # We don't use img.n_frames because that seeks through the entire
+                # gif to find the number of frames, leading to lockup on long gifs
+                # Instead we just go until we run out of frames and remember that for
+                # next time
+                total_frames = -1
                 frame = 0
                 while 1:
                     try:
@@ -31,8 +37,10 @@ class ImageViewer(module.Module):
                         if wait_time > 0:
                             time.sleep(wait_time)
                         frame += 1
-                    except Exception as e:
-                        print(e)
+                        if frame == total_frames:
+                            frame = 0
+                    except EOFError as e:
+                        total_frames = frame - 1
                         frame = 0
                         continue
             else:
