@@ -15,7 +15,7 @@ class ImageViewer(module.Module):
             # print("needs conversion" + str(img.mode))
             needs_resize = img.size != (self.width, self.height)
             # print("needs resize" + str(needs_resize))
-            if img.is_animated:
+            if getattr(img, "is_animated", True):
                 frame = 0
                 while 1:
                     try:
@@ -32,12 +32,13 @@ class ImageViewer(module.Module):
                             time.sleep(wait_time)
                         frame += 1
                     except Exception as e:
+                        print(e)
                         frame = 0
                         continue
             else:
                 self.image = img
                 if needs_conversion:
-                    self.image = img.convert('RGB')
+                    self.image = self.image.convert('RGB')
                 if needs_resize:
-                    self.image = img.resize((self.width,self.height))
+                    self.image = self.image.resize((self.width,self.height), resample = Image.NEAREST)
                 self.display()

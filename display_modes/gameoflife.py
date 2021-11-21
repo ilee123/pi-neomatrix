@@ -81,16 +81,17 @@ class GameOfLife(module.Module):
 
     def display(self):
         RAINBOW = (self.red, self.green, self.blue)
+        color_increment = 1
         if self.red > 0 and self.blue == 0:
-            self.red -= 20
-            self.green += 20
+            self.red -= color_increment
+            self.green += color_increment
         else:
             if self.green > 0:
-                self.green -= 20
-                self.blue += 20
+                self.green -= color_increment
+                self.blue += color_increment
             else:
-                self.blue -= 20
-                self.red += 20
+                self.blue -= color_increment
+                self.red += color_increment
         for x in range(self.width):
             for y in range(self.height):
                 self.pixels[x,y] = RAINBOW if self.state[x][y] else GameOfLife.DEAD
@@ -100,7 +101,7 @@ class GameOfLife(module.Module):
         self.display()
         time.sleep(0.5)
         while 1:
-            time.sleep(0.2)
+            time.sleep(1)
             self.advanceState()
             self.display()
 
